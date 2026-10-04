@@ -28,6 +28,7 @@
     <!-- The viewer page and its readers, shared with the phone app. Served by Viewer.Serve. -->
     <EmbeddedResource Include="..\viewer\*.*" LogicalName="viewer/%(Filename)%(Extension)" />
     <EmbeddedResource Include="..\viewer\lib\*.*" LogicalName="viewer/lib/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\viewer\fonts\*.*" LogicalName="viewer/fonts/%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>

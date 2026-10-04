@@ -21,35 +21,27 @@ async function get(path) {
 
 const show = {
   async pdf() {
-    const sizes = await (await get('pdf')).json();
-    main.className = 'pages';
-    // The width and height make each page take its place before its picture loads.
-    main.replaceChildren(...sizes.map(([width, height], i) =>
-      Object.assign(new Image(width, height), { src: `page/${i}`, loading: 'lazy', alt: `Page ${i + 1}` })));
+    await showPdf(main, await (await get('pdf')).json());   // see pdfview.js
   },
 
   async word() {
+    // Word saves where each page ended; using those breaks gives the same pages as Word.
+    // "experimental" turns on tab stops (text aligned with the Tab key).
+    const options = { ignoreLastRenderedPageBreak: false, experimental: true };
+    const doc = await docx.parseAsync(await (await get('file')).blob(), options);
+    markPageFields(doc);
     main.className = 'word';
-    main.replaceChildren();
-    await docx.renderAsync(await (await get('file')).blob(), main, null, { ignoreLastRenderedPageBreak: true });
-    fit();
-    addEventListener('resize', fit);
+    main.replaceChildren(...await docx.renderDocument(doc, options));
+    fillPageFields();
+    // Lay the page out at full paper width and let the phone scale the view to fit, like a desktop
+    // website. Shrinking the page with CSS instead breaks the tab stops, which are measured on screen.
+    const width = Math.max(...[...main.querySelectorAll('section.docx')].map((s) => s.offsetWidth));
+    if (width > 0 && screen.width < width + 16)
+      document.querySelector('meta[name=viewport]').content = `width=${width + 16}, initial-scale=${screen.width / (width + 16)}`;
   },
 
-  // ponytail: draws the whole sheet at once; very large sheets (100,000+ rows) will be slow.
   async sheet() {
-    const book = XLSX.read(await (await get('file')).arrayBuffer(), { dense: true });
-    const tabs = Object.assign(document.createElement('nav'), { className: 'tabs' });
-    const sheet = Object.assign(document.createElement('div'), { className: 'sheet' });
-    const pick = (n) => {
-      sheet.innerHTML = XLSX.utils.sheet_to_html(book.Sheets[n], { header: '', footer: '' });
-      for (const b of tabs.children) b.setAttribute('aria-pressed', b.textContent === n);
-    };
-    for (const n of book.SheetNames)
-      tabs.append(Object.assign(document.createElement('button'), { textContent: n, onclick: () => pick(n) }));
-    main.className = '';
-    main.replaceChildren(...(book.SheetNames.length > 1 ? [tabs] : []), sheet);
-    pick(book.SheetNames[0]);
+    await showSheet(main, await (await get('file')).arrayBuffer(), ext);   // see sheet.js
   },
 
   async text() {
@@ -65,13 +57,56 @@ const show = {
   },
 };
 
-// Word pages have a fixed paper width. Shrink them to fit a phone screen; pinch to zoom in.
-function fit() {
-  const wrapper = main.querySelector('.docx-wrapper');
-  const page = wrapper?.querySelector('section');
-  if (!page) return;
-  wrapper.style.zoom = 1;
-  wrapper.style.zoom = Math.min(1, document.documentElement.clientWidth / (page.offsetWidth + 16));
+// Headers and footers keep the page number that Word saved last ("Page 1 of 2" on every page).
+// Swap the saved value of each PAGE and NUMPAGES field for a marker, then fill in the real numbers
+// once the pages exist.
+const PAGE = '', PAGES = '';
+
+function markPageFields(doc) {
+  const marker = (instruction) => {
+    const name = instruction.trim().split(/\s+/)[0].toUpperCase();
+    return name === 'PAGE' ? PAGE : name === 'NUMPAGES' || name === 'SECTIONPAGES' ? PAGES : null;
+  };
+  for (const part of doc.parts) {
+    if (!/header|footer/.test(part.path)) continue;
+    let code = '', inResult = false, mark = null;
+    const walk = (el) => {
+      if (el.type === 'complexField') {
+        if (el.charType === 'begin') code = '';
+        if (el.charType === 'separate') { inResult = true; mark = marker(code); }
+        if (el.charType === 'end') { inResult = false; mark = null; }
+      } else if (el.type === 'instruction') {
+        code += el.text;
+      } else if (el.type === 'simpleField') {
+        mark = marker(el.instruction ?? '');
+        inResult = true;
+        el.children?.forEach(walk);
+        inResult = false;
+        return;
+      } else if (el.type === 'text' && inResult && mark) {
+        el.text = mark;   // the first piece of the saved value becomes the marker
+        mark = '';        // the rest of the saved value is removed
+      } else if (el.type === 'text' && inResult && mark === '') {
+        el.text = '';
+      }
+      el.children?.forEach(walk);
+    };
+    walk(part.rootElement);
+  }
+}
+
+function fillPageFields() {
+  const pages = main.querySelectorAll('section.docx');
+  pages.forEach((page, i) => {
+    for (const part of page.querySelectorAll('header, footer')) {
+      const walker = document.createTreeWalker(part, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const t = walker.currentNode;
+        if (t.data.includes(PAGE) || t.data.includes(PAGES))
+          t.data = t.data.replaceAll(PAGE, i + 1).replaceAll(PAGES, pages.length);
+      }
+    }
+  });
 }
 
 function message(text) {

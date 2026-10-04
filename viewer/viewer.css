@@ -12,9 +12,16 @@ body { margin: 0; }
 .message { margin: 0; padding: 48px 24px; text-align: center; color: var(--muted); }
 
 .pages { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; }
-.pages img { width: 100%; max-width: 900px; height: auto; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+.pages .page { position: relative; width: 100%; max-width: 900px; overflow: hidden; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+.pages .page img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; }
+.counter {
+  position: fixed; left: 0; top: 0; transform-origin: 0 0; z-index: 1; padding: 4px 12px; border-radius: 14px;
+  background: rgb(15 42 68 / .85); color: #fff; font: 14px system-ui, sans-serif; pointer-events: none;
+}
 
-.word .docx-wrapper { background: transparent; padding: 8px; }
+/* Word's "single" line spacing comes from the font, like line-height: normal. Not the page's 1.5. */
+.word { line-height: normal; }
+.word .docx-wrapper { background: transparent; padding: 8px; align-items: safe center; }
 .word .docx-wrapper > section.docx { margin-bottom: 8px; box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
 
 pre { margin: 0; padding: 16px; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 ui-monospace, Consolas, monospace; }
@@ -22,9 +29,32 @@ pre { margin: 0; padding: 16px; white-space: pre-wrap; overflow-wrap: anywhere; 
 .image { display: flex; justify-content: center; padding: 8px; }
 .image img { max-width: 100%; height: auto; }
 
-.tabs { position: sticky; top: 0; display: flex; gap: 6px; overflow-x: auto; padding: 8px; background: var(--ground); border-bottom: 1px solid var(--rule); }
+/* Spreadsheets (sheet.js): the grid stays light like Excel, in dark mode too. Sheet tabs sit at the bottom. */
+.book { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
+.grid { flex: 1; overflow: auto; background: #fff; overscroll-behavior: contain; touch-action: pan-x pan-y; }
+.grid table { border-collapse: separate; border-spacing: 0; table-layout: fixed; width: max-content; }
+.grid th, .grid td { box-sizing: border-box; overflow: hidden; white-space: nowrap; padding: 0 3px; }
+.grid td {
+  background: #fff; color: #000; font: 11pt Calibri, Carlito, Arial, sans-serif; vertical-align: bottom;
+  border-right: 1px solid #E1E1E1; border-bottom: 1px solid #E1E1E1;
+}
+.grid td.right { text-align: right; }
+.grid td.center { text-align: center; }
+.grid td.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+.grid td.spill { overflow: visible; }
+.grid th {
+  position: sticky; z-index: 2; background: #F3F3F3; color: #555; font: 12px system-ui, sans-serif;
+  text-align: center; border-right: 1px solid #C8C8C8; border-bottom: 1px solid #C8C8C8;
+}
+.grid thead th { top: 0; height: 22px; z-index: 4; }
+.grid tbody th { left: 0; }
+.grid thead th:first-child { left: 0; z-index: 5; }
+.grid td.frozen { position: sticky; z-index: 1; }
+.grid tr.frozen > * { position: sticky; z-index: 2; }
+.grid tr.frozen > td.frozen { z-index: 3; }
+.grid tr.frozen > th { z-index: 3; }
+.grid tr.edge > * { box-shadow: inset 0 -1px #888; }
+
+.tabs { flex: none; display: flex; gap: 6px; overflow-x: auto; padding: 8px; background: var(--ground); border-top: 1px solid var(--rule); }
 .tabs button { flex: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 18px; background: none; color: var(--ink); font: inherit; }
 .tabs button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground); }
-.sheet { overflow: auto; }
-.sheet table { border-collapse: collapse; }
-.sheet td { border: 1px solid var(--rule); padding: 4px 8px; white-space: nowrap; }

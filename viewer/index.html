@@ -5,10 +5,13 @@
 <!-- Only this app's own files: a document can't load anything from the internet. -->
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' blob:; img-src 'self' blob: data:; font-src 'self' blob: data:">
 <title>Porthole</title>
+<link rel="stylesheet" href="fonts.css">
 <link rel="stylesheet" href="viewer.css">
 <main><p class="message">Opening…</p></main>
 <script src="lib/jszip.min.js"></script>
 <script src="lib/docx-preview.min.js"></script>
 <script src="lib/xlsx.full.min.js"></script>
+<script src="sheet.js"></script>
+<script src="pdfview.js"></script>
 <script src="viewer.js"></script>
 </html>

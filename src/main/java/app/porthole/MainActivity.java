@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.pdf.PdfRenderer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -175,6 +176,9 @@ public class MainActivity extends Activity {
         s.setAllowContentAccess(false);
         s.setBuiltInZoomControls(true);   // pinch to zoom
         s.setDisplayZoomControls(false);
+        // Use the page's viewport width and start zoomed out to fit, so Word pages fit the screen.
+        s.setUseWideViewPort(true);
+        s.setLoadWithOverviewMode(true);
         w.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
@@ -206,7 +210,10 @@ public class MainActivity extends Activity {
         try {
             if (path.equals("/file")) return answer(200, mime(name), new FileInputStream(currentFile()));
             if (path.equals("/pdf")) return answer(200, "application/json", pageSizes().getBytes(StandardCharsets.UTF_8));
-            if (path.startsWith("/page/")) return answer(200, "image/jpeg", page(Integer.parseInt(path.substring(6))));
+            if (path.startsWith("/page/")) {
+                byte[] picture = page(Integer.parseInt(path.substring(6)), u);
+                return answer(200, u.getQueryParameter("cw") != null ? "image/png" : "image/jpeg", picture);
+            }
             return answer(200, mime(path), getAssets().open(path.substring(1)));
         } catch (IOException | RuntimeException e) {
             // Missing file, damaged PDF, PDF with a password (SecurityException), or a bad page number.
@@ -229,6 +236,7 @@ public class MainActivity extends Activity {
                 : n.endsWith(".js") ? "text/javascript"
                 : n.endsWith(".css") ? "text/css"
                 : n.endsWith(".svg") ? "image/svg+xml"
+                : n.endsWith(".woff2") ? "font/woff2"
                 : "application/octet-stream";
     }
 
@@ -262,19 +270,36 @@ public class MainActivity extends Activity {
         return json.append(']').toString();
     }
 
-    /** One page as a JPEG, twice as wide as the screen so text stays sharp when you zoom in. */
-    private synchronized byte[] page(int i) throws IOException {
+    /**
+     * One page, or one part of it, as a picture. The address /page/3?w=1080 draws page 3 at 1080 pixels
+     * wide (a JPEG). Adding x, y, cw and ch draws only that part of the page at that size, in those
+     * pixels (a PNG, for sharp text). The viewer asks for a part when you zoom in.
+     */
+    private synchronized byte[] page(int i, Uri u) throws IOException {
         try (PdfRenderer.Page p = pdf().openPage(i)) {
-            // ponytail: fixed 2x size, capped to save memory; render a sharper tile on zoom if 2x is not enough.
-            float scale = Math.min(Math.min(2048, 2 * getResources().getDisplayMetrics().widthPixels) / (float) p.getWidth(),
-                    4096f / p.getHeight());
-            Bitmap b = Bitmap.createBitmap(Math.max(1, Math.round(p.getWidth() * scale)), Math.max(1, Math.round(p.getHeight() * scale)), Bitmap.Config.ARGB_8888);
+            float width = number(u, "w", 1080);
+            float x = number(u, "x", 0), y = number(u, "y", 0);
+            float cw = number(u, "cw", width), ch = number(u, "ch", width * p.getHeight() / p.getWidth());
+            if (!(width >= 1 && cw >= 1 && ch >= 1 && x >= 0 && y >= 0)) throw new IOException("Bad size");   // also catches NaN
+            // Keep each picture under 16 million pixels (64 MB): draw a bigger request at a lower resolution.
+            float shrink = (float) Math.min(1, Math.sqrt(16e6 / (cw * ch)));
+            float scale = width * shrink / p.getWidth();
+            Bitmap b = Bitmap.createBitmap(Math.max(1, Math.round(cw * shrink)), Math.max(1, Math.round(ch * shrink)), Bitmap.Config.ARGB_8888);
             b.eraseColor(Color.WHITE);   // PDF pages are see-through where nothing is drawn
-            p.render(b, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
+            Matrix m = new Matrix();
+            m.setScale(scale, scale);
+            m.postTranslate(-x * shrink, -y * shrink);
+            p.render(b, null, m, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY);
             ByteArrayOutputStream out = new ByteArrayOutputStream();
-            b.compress(Bitmap.CompressFormat.JPEG, 90, out);
+            boolean part = u.getQueryParameter("cw") != null;
+            b.compress(part ? Bitmap.CompressFormat.PNG : Bitmap.CompressFormat.JPEG, 92, out);
             b.recycle();
             return out.toByteArray();
         }
+    }
+
+    private static float number(Uri u, String name, float fallback) {
+        String v = u.getQueryParameter(name);
+        return v == null ? fallback : Float.parseFloat(v);
     }
 }

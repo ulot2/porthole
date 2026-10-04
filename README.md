@@ -8,9 +8,9 @@ Porthole works offline. The app has no internet permission on Android, and a fil
 
 | Type | Extensions | Notes |
 |---|---|---|
-| PDF | `.pdf` | Android draws the pages with its own PDF reader. Windows uses the PDF viewer of Microsoft Edge. |
-| Word | `.docx` | Simple documents look like the original. Complex layouts can move a little. |
-| Excel | `.xlsx`, `.xlsm`, `.xls`, `.ods`, `.csv`, `.tsv` | Porthole shows the values of the cells, with one tab for each sheet. It does not show charts. |
+| PDF | `.pdf` | Android draws the pages with its own PDF reader. Pinch to zoom up to 10 times; when you stop, Porthole draws the part you see again, so text stays sharp. A page counter shows while you scroll. Windows uses the PDF viewer of Microsoft Edge. |
+| Word | `.docx` | Porthole shows the pages as Word does: the same page breaks (for files saved by Word), headers, footers with page numbers, tables, pictures and tab stops. On a phone, the page fits the screen; pinch to zoom. Complex layouts, such as text boxes and shapes, can move a little. |
+| Excel | `.xlsx`, `.xlsm`, `.xls`, `.ods`, `.csv`, `.tsv` | Porthole shows a grid like Excel: column letters and row numbers, frozen rows and columns, and one tab for each sheet. For `.xlsx` and `.xlsm` files, it also shows column widths, fonts, colors, borders and merged cells. It does not show charts, pictures or conditional formatting. On a phone, pinch the grid to zoom. |
 | Text | `.txt`, `.md`, `.log`, `.json`, `.xml`, `.ini`, `.yml`, `.yaml` | |
 | Images | `.png`, `.jpg`, `.jpeg`, `.gif`, `.webp`, `.bmp`, `.svg`, `.avif` | |
 
@@ -24,6 +24,18 @@ The page view shows the viewer page in `viewer/`. The two apps use the same view
 
 - [docx-preview](https://github.com/VolodymyrBaydalka/docxjs) (Apache 2.0) reads Word files. It uses [JSZip](https://github.com/Stuk/jszip) (MIT) to unpack them.
 - [SheetJS](https://sheetjs.com) (Apache 2.0) reads Excel files.
+
+Phones do not have the fonts of Microsoft Office, so the viewer page includes free fonts (SIL Open Font License, in `viewer/fonts/`) to use in their place:
+
+| Office font | Free font | Letter widths |
+|---|---|---|
+| Calibri, Calibri Light | Carlito | The same |
+| Arial, Helvetica | Arimo | The same |
+| Times New Roman | Tinos | The same |
+| Courier New | Cousine | The same |
+| Cambria | Caladea | Close, not the same |
+
+When the letter widths are the same, lines break at the same words as in Word. On a PC that has the Office fonts, Porthole uses the Office fonts.
 
 The app serves the viewer page and the open file at a made-up address, `https://porthole.local/`. Nothing goes to the internet. The viewer page also blocks all addresses outside the app.
 
