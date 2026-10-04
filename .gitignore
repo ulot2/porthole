@@ -1,0 +1,7 @@
+build/
+.gradle/
+bin/
+obj/
+local.properties
+*.p12
+keys/

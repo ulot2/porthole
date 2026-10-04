@@ -1,0 +1,23 @@
+<!-- A porthole: a thick ring with eight bolts and a glint on the glass, inside the 66dp safe zone of the 108dp canvas.
+     Colors from Ferry's icon, so the two apps look like one family. desktop/porthole.ico is the same drawing. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <path
+        android:pathData="M54,54 m-22,0 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0"
+        android:strokeColor="@color/icon_ink"
+        android:strokeWidth="10" />
+    <path android:fillColor="@color/icon_water" android:pathData="M76.00,54.00 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M69.56,69.56 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M54.00,76.00 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M38.44,69.56 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M32.00,54.00 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M38.44,38.44 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M54.00,32.00 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path android:fillColor="@color/icon_water" android:pathData="M69.56,38.44 m-1.8,0 a1.8,1.8 0 1,0 3.6,0 a1.8,1.8 0 1,0 -3.6,0" />
+    <path
+        android:pathData="M43,52 A12,12 0 0,1 52,43"
+        android:strokeColor="@color/icon_course"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round" />
+</vector>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ferry's day chart colors. The icon keeps them in dark mode too. -->
+<resources>
+    <color name="icon_water">#DCEBF2</color>
+    <color name="icon_ink">#0F2A44</color>
+    <color name="icon_course">#A3125F</color>
+</resources>

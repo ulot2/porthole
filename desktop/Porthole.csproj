@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>Porthole</AssemblyName>
+    <RootNamespace>Porthole</RootNamespace>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <!-- The file's own icon: Windows uses it in the taskbar, the Start menu and the "Open with" menu. -->
+    <ApplicationIcon>porthole.ico</ApplicationIcon>
+    <!-- One Porthole.exe that runs on any 64-bit Windows 10/11 PC, with no .NET install needed. -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <DebugType>none</DebugType>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <Version>0.0.0-local</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Edge's page view. Its runtime comes with Windows 11 and most Windows 10 PCs. -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4258.31" />
+    <!-- The viewer page and its readers, shared with the phone app. Served by Viewer.Serve. -->
+    <EmbeddedResource Include="..\viewer\*.*" LogicalName="viewer/%(Filename)%(Extension)" />
+    <EmbeddedResource Include="..\viewer\lib\*.*" LogicalName="viewer/lib/%(Filename)%(Extension)" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,30 @@
+/* Colors from Ferry's Nautical chart (see Ferry's DESIGN.md). Document pages stay white in dark mode. */
+:root {
+  --ground: #F2F6F8; --ink: #0F2A44; --muted: #3D5A73; --rule: #C9D9E2;
+  color-scheme: light dark;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --ground: #16191D; --ink: #DDE2E6; --muted: #A0A9B2; --rule: #2F363E; }
+}
+html { background: var(--ground); color: var(--ink); font: 15px/1.5 system-ui, sans-serif; }
+body { margin: 0; }
+
+.message { margin: 0; padding: 48px 24px; text-align: center; color: var(--muted); }
+
+.pages { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 8px; }
+.pages img { width: 100%; max-width: 900px; height: auto; background: #fff; box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+
+.word .docx-wrapper { background: transparent; padding: 8px; }
+.word .docx-wrapper > section.docx { margin-bottom: 8px; box-shadow: 0 1px 3px rgb(0 0 0 / .25); }
+
+pre { margin: 0; padding: 16px; white-space: pre-wrap; overflow-wrap: anywhere; font: 13px/1.5 ui-monospace, Consolas, monospace; }
+
+.image { display: flex; justify-content: center; padding: 8px; }
+.image img { max-width: 100%; height: auto; }
+
+.tabs { position: sticky; top: 0; display: flex; gap: 6px; overflow-x: auto; padding: 8px; background: var(--ground); border-bottom: 1px solid var(--rule); }
+.tabs button { flex: none; min-height: 36px; padding: 0 14px; border: 1px solid var(--rule); border-radius: 18px; background: none; color: var(--ink); font: inherit; }
+.tabs button[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--ground); }
+.sheet { overflow: auto; }
+.sheet table { border-collapse: collapse; }
+.sheet td { border: 1px solid var(--rule); padding: 4px 8px; white-space: nowrap; }
